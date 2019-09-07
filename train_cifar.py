@@ -2,7 +2,7 @@ from utils import config, data_stream
 from utils import utils
 import os
 
-os.environ["CUDA_VISIBLE_DEVISE"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 Cifar_train_config = config.Cifar_config()
 

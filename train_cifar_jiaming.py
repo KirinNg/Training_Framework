@@ -3,7 +3,7 @@ from utils import utils
 import os
 import tensorflow as tf
 
-os.environ["CUDA_VISIBLE_DEVISE"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 Cifar_train_config = config.Cifar_config()
 
@@ -24,7 +24,7 @@ def StepLL_for_this_statu(x, logits, origin_label, eps=0.05):
                                                     weights=1.0)
     x_adv = x - eps * tf.sign(tf.gradients(cross_entropy, x)[0])
     x_adv = tf.clip_by_value(x_adv, -1.0, 1.0)
-    return tf.stop_gradient(x_adv)
+    return tf.stop_gradient(x_adv), one_hot_class
 
 
 attack_op = StepLL_for_this_statu(Cifar_common_trainer.image_input_placehoder,
@@ -36,9 +36,9 @@ for e in range(Cifar_train_config.epoch):
         image_batch, label_batch = Cifar_datastream.get_one_batch(Cifar_common_trainer.sess)
 
         # get attacked img
-        image_batch = Cifar_common_trainer.sess.run(attack_op, feed_dict=Cifar_common_trainer.get_feed(image_batch, label_batch, "att"))
+        new_batch = Cifar_common_trainer.sess.run(attack_op, feed_dict=Cifar_common_trainer.get_feed(image_batch, label_batch, "att"))
 
-        _acc, cls_loss, l2 = Cifar_common_trainer.train(image_batch, label_batch)
+        _acc, cls_loss, l2 = Cifar_common_trainer.train(new_batch[0], new_batch[1])
         if (s + 1) % 20 == 0:
             val_image_batch, val_label_batch = Cifar_datastream_val.get_one_batch(Cifar_common_trainer.sess)
             val_acc = Cifar_common_trainer.get_acc(val_image_batch, val_label_batch)

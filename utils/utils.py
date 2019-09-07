@@ -37,13 +37,23 @@ class Common_Framework:
         correct_p = tf.equal(tf.argmax(self.probs, 1), (tf.argmax(self.label_input_placehoder, 1)))
         self.accuracy = tf.reduce_mean(tf.cast(correct_p, "float"))
 
+        def caculate_topK(indices, k):
+            label = tf.argmax(self.label_input_placehoder, axis=1, output_type=tf.int32)
+            a = indices - tf.reshape(label, (self.train_config.BATCH_SIZE, 1))
+            b = tf.equal(a, tf.zeros(shape=(self.train_config.BATCH_SIZE, k), dtype=tf.int32))
+            return tf.reduce_mean(tf.reduce_sum(tf.cast(b, tf.float32), axis=1), name='top_{}'.format(k))
+
+        _, self.top_5_indices = tf.nn.top_k(self.logits, k=5, name='top_5_indices')
+        self.acc_top_5 = caculate_topK(self.top_5_indices, 5)
+
+
         # ready for train
         if self.train_config.lr == "decay":
-            self.lr = tf.train.exponential_decay(0.002, self.global_steps, self.train_config.step_per_epoch // 2, 0.98, staircase=False)
+            self.lr = tf.train.exponential_decay(0.001, self.global_steps, self.train_config.step_per_epoch // 2, 0.98, staircase=False)
         else:
             self.lr = self.train_config.lr
 
-        self.train_op = tf.train.RMSPropOptimizer(self.lr)
+        self.train_op = tf.train.RMSPropOptimizer(self.lr, momentum=0.9)
         self.var_list = tf.trainable_variables()
 
         gradients = tf.gradients(self.total_loss, self.var_list)
@@ -56,17 +66,17 @@ class Common_Framework:
         self.sess.run(tf.global_variables_initializer())
 
     def train(self, batch_image, batch_label):
-        _acc, cls_loss, l2_loss, _, summary, gs = self.sess.run([self.accuracy, self.classification_loss, self.l2_loss, self.train_op,
+        _acc, _acc5, cls_loss, l2_loss, _, summary, gs = self.sess.run([self.accuracy, self.acc_top_5, self.classification_loss, self.l2_loss, self.train_op,
                                                      self.summary_op, self.global_steps],
                                                     feed_dict=self.get_feed(batch_image, batch_label))
         self.train_writer.add_summary(summary, gs)
-        return _acc, cls_loss, l2_loss
+        return _acc, _acc5, cls_loss, l2_loss
 
     def get_acc(self, batch_image, batch_label):
-        _acc, summary, gs = self.sess.run([self.accuracy, self.summary_op, self.global_steps],
+        _acc, _acc5, summary, gs = self.sess.run([self.accuracy, self.acc_top_5, self.summary_op, self.global_steps],
                                           feed_dict=self.get_feed(batch_image, batch_label, "val"))
         self.val_writer.add_summary(summary, gs)
-        return _acc
+        return _acc, _acc5
 
     def get_feed(self, batch_image, batch_label, type="train"):
         if type == "train":
@@ -103,6 +113,7 @@ class Common_Framework:
 
         tf.summary.scalar('learnning rate', self.lr)
         tf.summary.scalar('accuracy', self.accuracy)
+        tf.summary.scalar('acc top 5', self.acc_top_5)
         self.summary_op = tf.summary.merge_all()
 
 

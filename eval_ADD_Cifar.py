@@ -5,7 +5,7 @@ import utils.attack_method as attack_method
 import tensorflow as tf
 import numpy as np
 
-os.environ["CUDA_VISIBLE_DEVISE"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 Cifar_train_config = config.Cifar_config()
 Cifar_train_config.BATCH_SIZE = 500

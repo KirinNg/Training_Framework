@@ -30,7 +30,7 @@ def cifar_net(image, reuse=tf.AUTO_REUSE, keep_prop=0.5):
 def Alex_net(image, reuse=tf.AUTO_REUSE, keep_prop=0.5):
     image = tf.reshape(image, [-1, 224, 224, 3])
     with tf.variable_scope(name_or_scope='Alex', reuse=reuse):
-        arg_scope = alexnet.alexnet_v2_arg_scope()
+        arg_scope = alexnet.alexnet_v2_arg_scope(0.00005)
         with slim.arg_scope(arg_scope):
             logits, end_point = alexnet.alexnet_v2(image, 1000, is_training=True, dropout_keep_prob=keep_prop)
             probs = tf.nn.softmax(logits)  # probabilities
