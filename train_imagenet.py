@@ -24,5 +24,5 @@ for e in range(current_step//ImageNet_train_config.step_per_epoch, ImageNet_trai
         if (s + 1) % 20 == 0:
             val_image_batch, val_label_batch = ImageNet_datastream.get_one_batch_val(ImageNet_common_trainer.sess)
             val_acc, val_acc5 = ImageNet_common_trainer.get_acc(val_image_batch, val_label_batch)
-            print("CLS_LOSS:{:.3f}, L2:{:.3f}, ACC:{:.4f}, ACC5:{:.4f} EPOCH:{}, STEP:{}, VAL_ACC:{:.4f}, VAL_ACC5:{:.4f}".format(cls_loss, l2, _acc, _acc5, e, s, val_acc, val_acc5))
+            print("CLS_LOSS:{:.3f}, L2:{:.3f}, ACC:{:.4f}, ACC5:{:.4f}, EPOCH:{}, STEP:{}, VAL_ACC:{:.4f}, VAL_ACC5:{:.4f}".format(cls_loss, l2, _acc, _acc5, e, s, val_acc, val_acc5))
     ImageNet_common_trainer.save("/home/kirin/Documents/save_model_tmp/ImageNet/imagenet.ckpt")

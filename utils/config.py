@@ -59,13 +59,13 @@ class MNIST_config:
 class ImageNet_config:
     def __init__(self):
         # step_train
-        self.epoch = 150
+        self.epoch = 100
         self.BATCH_SIZE = 512
         self.step_per_epoch = 1281167 // self.BATCH_SIZE
 
         # train config
-        self.lr = 0.01
-        # self.lr = "decay"
+        # self.lr = 0.04
+        self.lr = "decay"
         self.sess_config = tf.ConfigProto()
         self.sess_config.gpu_options.allow_growth = True
 

@@ -49,11 +49,15 @@ class Common_Framework:
 
         # ready for train
         if self.train_config.lr == "decay":
-            self.lr = tf.train.exponential_decay(0.001, self.global_steps, self.train_config.step_per_epoch // 2, 0.98, staircase=False)
+            # self.lr = tf.train.exponential_decay(0.001, self.global_steps, self.train_config.step_per_epoch // 2, 0.98, staircase=False)
+            boundaries = [self.train_config.step_per_epoch//4, self.train_config.step_per_epoch//2, self.train_config.step_per_epoch*3//4,
+                          self.train_config.step_per_epoch * 30, self.train_config.step_per_epoch * 60]
+            learing_rates = [0.001, 0.003, 0.01, 0.04, 0.004, 0.0004]
+            self.lr = tf.train.piecewise_constant(self.global_steps, boundaries=boundaries, values=learing_rates)
         else:
             self.lr = self.train_config.lr
 
-        self.train_op = tf.train.RMSPropOptimizer(self.lr, momentum=0.9)
+        self.train_op = tf.train.MomentumOptimizer(self.lr, momentum=0.9)
         self.var_list = tf.trainable_variables()
 
         gradients = tf.gradients(self.total_loss, self.var_list)

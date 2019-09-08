@@ -119,10 +119,10 @@ class ImageNet_datastream:
             image = tf.image.random_flip_left_right(image)
             image = tf.image.random_brightness(image, max_delta=0.1)
             image = tf.image.random_contrast(image, lower=0.2, upper=1.8)
-            image = (image / 255 - 0.5) * 2
+            image = image / 255
 
-            img_batch, label_batch = tf.train.shuffle_batch([image, label], batch_size=batchsize, num_threads=16,
-                                                            capacity=8192, min_after_dequeue=2048)
+            img_batch, label_batch = tf.train.shuffle_batch([image, label], batch_size=batchsize, num_threads=32,
+                                                            capacity=8192*4, min_after_dequeue=512)
             label_batch = tf.one_hot(label_batch, 1000)
             return img_batch, label_batch
         else:
@@ -135,11 +135,11 @@ class ImageNet_datastream:
 
             image = self._fixed_sides_resize(image, output_height=imgsize, output_width=imgsize)
 
-            image = (image / 255 - 0.5) * 2
+            image = image / 255
 
             # img_batch, label_batch = tf.train.batch([image, label], batch_size=batchsize, allow_smaller_final_batch=True)
-            img_batch, label_batch = tf.train.shuffle_batch([image, label], batch_size=batchsize, num_threads=8,
-                                                            capacity=4096, min_after_dequeue=2048)
+            img_batch, label_batch = tf.train.shuffle_batch([image, label], batch_size=batchsize, num_threads=2,
+                                                            capacity=4096, min_after_dequeue=512)
             label_batch = tf.one_hot(label_batch, 1000)
             return img_batch, label_batch
 
